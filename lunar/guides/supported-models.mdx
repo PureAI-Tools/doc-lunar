@@ -51,6 +51,70 @@ The Lunar SDK supports 100+ models from 11 providers. You can call any model dir
 
 ---
 
+## Intelligent Routing
+
+When you call a model without specifying a provider, the API automatically selects the best available provider based on real-time data:
+
+```python
+from lunar import Lunar
+
+client = Lunar()
+
+# No provider specified - API chooses the best one
+response = client.chat.completions.create(
+    model="llama-3.3-70b",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+
+# The API might route to Groq, Bedrock, Cerebras, or SambaNova
+# based on current performance metrics
+```
+
+### How Provider Selection Works
+
+When multiple providers support the same model, the routing engine considers:
+
+| Factor | Description |
+|--------|-------------|
+| **Latency** | Current response times from each provider |
+| **Availability** | Provider health and uptime status |
+| **Cost** | Token pricing differences between providers |
+| **Load** | Current traffic and queue times |
+
+<Note>
+You only need to configure API keys for the providers you want to use. The routing engine will only consider providers where you have valid credentials configured.
+</Note>
+
+### Example: Llama Models
+
+`llama-3.3-70b` is available on multiple providers. Without a prefix, the API routes intelligently:
+
+```python
+# Intelligent routing - best provider chosen automatically
+response = client.chat.completions.create(
+    model="llama-3.3-70b",
+    messages=[{"role": "user", "content": "Explain quantum computing"}]
+)
+
+# If you need a specific provider:
+response = client.chat.completions.create(
+    model="groq/groq-llama-3.3-70b-versatile",  # Ultra-fast inference
+    messages=[{"role": "user", "content": "Explain quantum computing"}]
+)
+
+response = client.chat.completions.create(
+    model="bedrock/llama-3.3-70b-instruct",  # AWS infrastructure
+    messages=[{"role": "user", "content": "Explain quantum computing"}]
+)
+
+response = client.chat.completions.create(
+    model="cerebras/cerebras-llama-3.3-70b",  # Cerebras inference
+    messages=[{"role": "user", "content": "Explain quantum computing"}]
+)
+```
+
+---
+
 ## Models by Provider
 
 <Tabs>
