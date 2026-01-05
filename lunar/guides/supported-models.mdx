@@ -1,0 +1,547 @@
+---
+title: 'Supported Models'
+description: 'Complete list of all supported models with IDs and usage examples'
+---
+
+# Supported Models
+
+The Lunar SDK supports 100+ models from 11 providers. You can call any model directly (the API chooses the best provider) or force a specific provider using the `provider/model` syntax.
+
+## How to Call Models
+
+<Tabs>
+  <Tab title="Auto Routing">
+    Let the API choose the best provider automatically:
+
+    ```python
+    from lunar import Lunar
+
+    client = Lunar()
+
+    # API automatically selects the best provider
+    response = client.chat.completions.create(
+        model="claude-3-7-sonnet",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+    ```
+  </Tab>
+
+  <Tab title="Force Provider">
+    Use `provider/model` syntax to route to a specific provider:
+
+    ```python
+    from lunar import Lunar
+
+    client = Lunar()
+
+    # Force Anthropic as the provider
+    response = client.chat.completions.create(
+        model="anthropic/claude-3-7-sonnet",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+
+    # Force Bedrock as the provider
+    response = client.chat.completions.create(
+        model="bedrock/claude-3-7-sonnet",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Models by Provider
+
+<Tabs>
+  <Tab title="OpenAI">
+    ### OpenAI Models
+
+    Use prefix: `openai/`
+
+    ```python
+    response = client.chat.completions.create(
+        model="openai/gpt-4o",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+    ```
+
+    #### GPT-4o Series
+    | Model ID | Description |
+    |----------|-------------|
+    | `gpt-4o` | Latest multimodal flagship model |
+    | `gpt-4o-mini` | Fast and cost-effective |
+    | `gpt-4o-2024-05-13` | Specific dated version |
+    | `gpt-4o-search-preview` | With web search capabilities |
+    | `gpt-4o-mini-search-preview` | Mini with web search |
+
+    #### GPT-4.1 Series
+    | Model ID | Description |
+    |----------|-------------|
+    | `gpt-4.1` | Enhanced GPT-4 |
+    | `gpt-4.1-mini` | Smaller, faster variant |
+    | `gpt-4.1-nano` | Fastest, most efficient |
+
+    #### GPT-5 Series
+    | Model ID | Description |
+    |----------|-------------|
+    | `gpt-5` | Next generation flagship |
+    | `gpt-5-pro` | Professional tier |
+    | `gpt-5-mini` | Balanced performance |
+    | `gpt-5-nano` | Fast and efficient |
+    | `gpt-5-chat-latest` | Latest chat version |
+    | `gpt-5-search-api` | With search capabilities |
+
+    #### GPT-5.1 Series
+    | Model ID | Description |
+    |----------|-------------|
+    | `gpt-5.1` | Latest GPT-5 update |
+    | `gpt-5.1-chat-latest` | Latest chat version |
+    | `gpt-5.1-codex` | Code specialized |
+    | `gpt-5.1-codex-mini` | Compact code model |
+
+    #### o1 Reasoning Series
+    | Model ID | Description |
+    |----------|-------------|
+    | `o1` | Advanced reasoning model |
+    | `o1-mini` | Compact reasoning |
+    | `o1-pro` | Professional reasoning |
+
+    #### o3 Reasoning Series
+    | Model ID | Description |
+    |----------|-------------|
+    | `o3` | Latest reasoning model |
+    | `o3-mini` | Compact variant |
+    | `o3-pro` | Professional tier |
+    | `o3-deep-research` | Deep research capabilities |
+
+    #### o4 Series
+    | Model ID | Description |
+    |----------|-------------|
+    | `o4-mini` | Compact reasoning |
+    | `o4-mini-deep-research` | With deep research |
+
+    #### Specialized Models
+    | Model ID | Description |
+    |----------|-------------|
+    | `codex-mini-latest` | Code generation |
+    | `computer-use-preview` | Computer use capabilities |
+  </Tab>
+
+  <Tab title="Anthropic">
+    ### Anthropic Models
+
+    Use prefix: `anthropic/`
+
+    ```python
+    response = client.chat.completions.create(
+        model="anthropic/claude-sonnet-4-5",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+    ```
+
+    #### Claude 4.5 Series (Latest)
+    | Model ID | Description |
+    |----------|-------------|
+    | `claude-opus-4-5` | Most capable, complex tasks |
+    | `claude-sonnet-4-5` | Balanced performance |
+    | `claude-haiku-4-5` | Fast and efficient |
+
+    #### Claude 4 Series
+    | Model ID | Description |
+    |----------|-------------|
+    | `claude-opus-4` | High capability |
+    | `claude-opus-4-1` | Updated variant |
+    | `claude-sonnet-4` | Balanced model |
+    | `claude-sonnet-4-5` | Enhanced Sonnet |
+
+    #### Claude 3.7 Series
+    | Model ID | Description |
+    |----------|-------------|
+    | `claude-3-7-sonnet` | Latest Sonnet (200K context) |
+
+    #### Claude 3.5 Series
+    | Model ID | Description |
+    |----------|-------------|
+    | `claude-3-5-haiku` | Fast responses |
+
+    #### Claude 3 Series
+    | Model ID | Description |
+    |----------|-------------|
+    | `claude-3-opus` | Most capable v3 |
+    | `claude-3-haiku` | Fast and affordable |
+  </Tab>
+
+  <Tab title="Google">
+    ### Google Gemini Models
+
+    Use prefix: `gemini/`
+
+    ```python
+    response = client.chat.completions.create(
+        model="gemini/gemini-2.5-pro",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+    ```
+
+    #### Gemini 3 Preview
+    | Model ID | Description |
+    |----------|-------------|
+    | `gemini-3-pro-preview` | Next gen professional |
+    | `gemini-3-flash-preview` | Next gen fast |
+
+    #### Gemini 2.5 Series
+    | Model ID | Description |
+    |----------|-------------|
+    | `gemini-2.5-pro` | Professional tier (1M context) |
+    | `gemini-2.5-flash` | Fast responses |
+    | `gemini-2.5-flash-lite` | Lightweight version |
+
+    #### Gemini 2.0 Series
+    | Model ID | Description |
+    |----------|-------------|
+    | `gemini-2.0-flash` | Fast multimodal |
+    | `gemini-2.0-flash-lite` | Lightweight version |
+  </Tab>
+
+  <Tab title="Mistral">
+    ### Mistral Models
+
+    Use prefix: `mistral/`
+
+    ```python
+    response = client.chat.completions.create(
+        model="mistral/mistral-large-latest",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+    ```
+
+    #### Core Models
+    | Model ID | Description |
+    |----------|-------------|
+    | `mistral-large-latest` | Most capable |
+    | `mistral-medium-latest` | Balanced |
+    | `mistral-small-latest` | Fast and efficient |
+
+    #### Magistral Series (Reasoning)
+    | Model ID | Description |
+    |----------|-------------|
+    | `magistral-medium-latest` | Reasoning medium |
+    | `magistral-small-latest` | Reasoning small |
+
+    #### Code Models
+    | Model ID | Description |
+    |----------|-------------|
+    | `codestral-latest` | Code specialized |
+
+    #### Open Models
+    | Model ID | Description |
+    |----------|-------------|
+    | `open-mistral-nemo` | Open source variant |
+  </Tab>
+
+  <Tab title="DeepSeek">
+    ### DeepSeek Models
+
+    Use prefix: `deepseek/`
+
+    ```python
+    response = client.chat.completions.create(
+        model="deepseek/deepseek-chat",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+    ```
+
+    | Model ID | Description |
+    |----------|-------------|
+    | `deepseek-chat` | General chat model |
+    | `deepseek-reasoner` | Advanced reasoning |
+  </Tab>
+
+  <Tab title="Perplexity">
+    ### Perplexity Sonar Models
+
+    Use prefix: `perplexity/`
+
+    ```python
+    response = client.chat.completions.create(
+        model="perplexity/sonar-pro",
+        messages=[{"role": "user", "content": "What are the latest news?"}]
+    )
+    ```
+
+    | Model ID | Description |
+    |----------|-------------|
+    | `sonar` | Base search model |
+    | `sonar-pro` | Enhanced search |
+    | `sonar-reasoning` | With reasoning |
+    | `sonar-reasoning-pro` | Pro reasoning |
+    | `sonar-deep-research` | In-depth research |
+  </Tab>
+
+  <Tab title="Groq">
+    ### Groq Models (Ultra-Fast Inference)
+
+    Use prefix: `groq/`
+
+    ```python
+    response = client.chat.completions.create(
+        model="groq/groq-llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+    ```
+
+    #### Llama Models
+    | Model ID | Description |
+    |----------|-------------|
+    | `groq-llama-3.1-8b-instant` | Ultra fast 8B |
+    | `groq-llama-3.3-70b-versatile` | Versatile 70B |
+    | `groq-llama-4-scout` | Scout model |
+    | `groq-llama-4-maverick` | Maverick model |
+
+    #### Qwen Models
+    | Model ID | Description |
+    |----------|-------------|
+    | `groq-qwen3-32b` | Qwen 32B |
+
+    #### GPT-OSS Models
+    | Model ID | Description |
+    |----------|-------------|
+    | `groq-gpt-oss-20b` | Open source 20B |
+    | `groq-gpt-oss-120b` | Open source 120B |
+
+    #### Other Models
+    | Model ID | Description |
+    |----------|-------------|
+    | `groq-kimi-k2-instruct` | Kimi K2 Instruct |
+  </Tab>
+
+  <Tab title="Cerebras">
+    ### Cerebras Models (Fast Inference)
+
+    Use prefix: `cerebras/`
+
+    ```python
+    response = client.chat.completions.create(
+        model="cerebras/cerebras-llama-3.3-70b",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+    ```
+
+    #### Llama Models
+    | Model ID | Description |
+    |----------|-------------|
+    | `cerebras-llama-3.1-8b` | Fast 8B |
+    | `cerebras-llama-3.3-70b` | Fast 70B |
+
+    #### Qwen Models
+    | Model ID | Description |
+    |----------|-------------|
+    | `cerebras-qwen-3-32b` | Qwen 32B |
+    | `cerebras-qwen-3-235b` | Qwen 235B |
+
+    #### Other Models
+    | Model ID | Description |
+    |----------|-------------|
+    | `cerebras-gpt-oss-120b` | GPT OSS 120B |
+    | `cerebras-zai-glm-4.6` | ZAI GLM 4.6 |
+  </Tab>
+
+  <Tab title="SambaNova">
+    ### SambaNova Models
+
+    Use prefix: `sambanova/`
+
+    ```python
+    response = client.chat.completions.create(
+        model="sambanova/sambanova-llama-3.3-70b",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+    ```
+
+    | Model ID | Description |
+    |----------|-------------|
+    | `sambanova-llama-3.1-8b` | Llama 3.1 8B |
+    | `sambanova-llama-3.3-70b` | Llama 3.3 70B |
+    | `sambanova-qwen3-32b` | Qwen3 32B |
+    | `sambanova-gpt-oss-120b` | GPT OSS 120B |
+    | `sambanova-deepseek-r1` | DeepSeek R1 |
+    | `sambanova-deepseek-v3` | DeepSeek V3 |
+  </Tab>
+
+  <Tab title="AWS Bedrock">
+    ### AWS Bedrock Models
+
+    Use prefix: `bedrock/`
+
+    ```python
+    response = client.chat.completions.create(
+        model="bedrock/amazon-nova-pro",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+    ```
+
+    #### Amazon Nova
+    | Model ID | Description |
+    |----------|-------------|
+    | `amazon-nova-micro` | Smallest, fastest |
+    | `amazon-nova-lite` | Lightweight |
+    | `amazon-nova-pro` | Professional |
+    | `amazon-nova-premier` | Most capable |
+
+    #### Claude on Bedrock
+    | Model ID | Description |
+    |----------|-------------|
+    | `claude-3-5-haiku` | Claude 3.5 Haiku |
+    | `claude-3-7-sonnet` | Claude 3.7 Sonnet |
+    | `claude-3-haiku` | Claude 3 Haiku |
+    | `claude-3-opus` | Claude 3 Opus |
+    | `claude-3.5-haiku` | Claude 3.5 Haiku (alt) |
+    | `claude-3.5-sonnet` | Claude 3.5 Sonnet |
+    | `claude-3.7-sonnet` | Claude 3.7 Sonnet (alt) |
+    | `claude-haiku-4-5` | Claude Haiku 4.5 |
+    | `claude-haiku-4.5` | Claude Haiku 4.5 (alt) |
+    | `claude-opus-4` | Claude Opus 4 |
+    | `claude-opus-4.1` | Claude Opus 4.1 |
+    | `claude-opus-4.5` | Claude Opus 4.5 |
+    | `claude-sonnet-4` | Claude Sonnet 4 |
+    | `claude-sonnet-4-5` | Claude Sonnet 4.5 |
+    | `claude-sonnet-4.5` | Claude Sonnet 4.5 (alt) |
+
+    #### Cohere on Bedrock
+    | Model ID | Description |
+    |----------|-------------|
+    | `command-r` | Command R base |
+    | `command-r+` | Enhanced Command R |
+
+    #### DeepSeek on Bedrock
+    | Model ID | Description |
+    |----------|-------------|
+    | `deepseek-r1` | DeepSeek R1 reasoning |
+
+    #### Gemma on Bedrock
+    | Model ID | Description |
+    |----------|-------------|
+    | `gemma-3-4b-it` | Gemma 3 4B Instruct |
+    | `gemma-3-12b-it` | Gemma 3 12B Instruct |
+    | `gemma-3-27b-pt` | Gemma 3 27B Pretrained |
+
+    #### GPT-OSS on Bedrock
+    | Model ID | Description |
+    |----------|-------------|
+    | `gpt-oss-20b` | GPT OSS 20B |
+    | `gpt-oss-120b` | GPT OSS 120B |
+
+    #### AI21 Jamba on Bedrock
+    | Model ID | Description |
+    |----------|-------------|
+    | `jamba-1.5-mini` | Jamba 1.5 Mini |
+    | `jamba-1.5-large` | Jamba 1.5 Large |
+
+    #### Llama on Bedrock
+    | Model ID | Description |
+    |----------|-------------|
+    | `llama-3-1-8b` | Llama 3.1 8B |
+    | `llama-3-1-70b` | Llama 3.1 70B |
+    | `llama-3-1-405b` | Llama 3.1 405B |
+    | `llama-3-2-1b` | Llama 3.2 1B |
+    | `llama-3-2-3b` | Llama 3.2 3B |
+    | `llama-3-3-70b` | Llama 3.3 70B |
+    | `llama-3.1-8b-instruct` | Llama 3.1 8B Instruct |
+    | `llama-3.1-70b-instruct` | Llama 3.1 70B Instruct |
+    | `llama-3.2-1b-instruct` | Llama 3.2 1B Instruct |
+    | `llama-3.2-3b-instruct` | Llama 3.2 3B Instruct |
+    | `llama-3.2-11b-vision-instruct` | Llama 3.2 11B Vision |
+    | `llama-3.2-90b-vision-instruct` | Llama 3.2 90B Vision |
+    | `llama-3.3-70b-instruct` | Llama 3.3 70B Instruct |
+    | `llama-4-scout-17b` | Llama 4 Scout 17B |
+    | `llama-4-maverick-17b` | Llama 4 Maverick 17B |
+
+    #### Mistral on Bedrock
+    | Model ID | Description |
+    |----------|-------------|
+    | `mistral-7b` | Mistral 7B |
+    | `mistral-small` | Mistral Small |
+    | `mistral-large` | Mistral Large |
+    | `mistral-large-3` | Mistral Large 3 |
+    | `mixtral-8x7b` | Mixtral 8x7B MoE |
+    | `ministral-3-8b` | Ministral 3 8B |
+    | `ministral-14b-3.0` | Ministral 14B 3.0 |
+    | `magistral-small-2509` | Magistral Small |
+    | `pixtral-large-25.02` | Pixtral Large (Vision) |
+
+    #### Qwen on Bedrock
+    | Model ID | Description |
+    |----------|-------------|
+    | `qwen3-32b` | Qwen3 32B |
+    | `qwen3-coder-30b-a3b` | Qwen3 Coder 30B |
+  </Tab>
+</Tabs>
+
+---
+
+## Quick Reference
+
+### Provider Prefixes
+
+| Provider | Prefix | Example |
+|----------|--------|---------|
+| OpenAI | `openai/` | `openai/gpt-4o` |
+| Anthropic | `anthropic/` | `anthropic/claude-sonnet-4-5` |
+| Google | `gemini/` | `gemini/gemini-2.5-pro` |
+| Mistral | `mistral/` | `mistral/mistral-large-latest` |
+| DeepSeek | `deepseek/` | `deepseek/deepseek-chat` |
+| Perplexity | `perplexity/` | `perplexity/sonar-pro` |
+| Groq | `groq/` | `groq/groq-llama-3.3-70b-versatile` |
+| Cerebras | `cerebras/` | `cerebras/cerebras-llama-3.3-70b` |
+| SambaNova | `sambanova/` | `sambanova/sambanova-llama-3.3-70b` |
+| AWS Bedrock | `bedrock/` | `bedrock/amazon-nova-pro` |
+
+### Models with Multiple Providers
+
+Some models are available from multiple providers. The API automatically routes to the best available provider, or you can force a specific one:
+
+| Model | Available Providers |
+|-------|---------------------|
+| `claude-3-5-haiku` | anthropic, bedrock |
+| `claude-3-7-sonnet` | anthropic, bedrock |
+| `claude-3-haiku` | anthropic, bedrock |
+| `claude-3-opus` | anthropic, bedrock |
+| `claude-haiku-4-5` | anthropic, bedrock |
+| `claude-opus-4` | anthropic, bedrock |
+| `claude-sonnet-4` | anthropic, bedrock |
+| `claude-sonnet-4-5` | anthropic, bedrock |
+
+```python
+# Let API choose the best provider
+response = client.chat.completions.create(
+    model="claude-3-7-sonnet",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+
+# Force Anthropic
+response = client.chat.completions.create(
+    model="anthropic/claude-3-7-sonnet",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+
+# Force Bedrock
+response = client.chat.completions.create(
+    model="bedrock/claude-3-7-sonnet",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+```
+
+---
+
+## Model Selection Guidelines
+
+| Use Case | Recommended Models |
+|----------|-------------------|
+| **Low cost** | `gpt-4o-mini`, `claude-3-haiku`, `gemini-2.0-flash-lite` |
+| **Fast responses** | `groq-llama-3.1-8b-instant`, `cerebras-llama-3.1-8b` |
+| **Complex reasoning** | `o3`, `claude-opus-4-5`, `deepseek-reasoner` |
+| **Code generation** | `gpt-5.1-codex`, `claude-sonnet-4-5`, `codestral-latest` |
+| **Large context** | `gemini-2.5-pro` (1M), `claude-3-7-sonnet` (200K) |
+| **Web search** | `sonar-pro`, `sonar-deep-research`, `gpt-4o-search-preview` |
+| **Research** | `sonar-deep-research`, `o3-deep-research` |

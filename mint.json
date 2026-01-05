@@ -73,6 +73,7 @@
             "lunar/guides/fallbacks",
             "lunar/guides/cost-tracking",
             "lunar/guides/models-providers",
+            "lunar/guides/supported-models",
             "lunar/guides/streaming",
             "lunar/guides/async-usage"
           ]
