@@ -25,22 +25,91 @@ x-api-key: {your-api-key}
 
 Create a chat completion.
 
-**Request:**
+<Tabs>
+  <Tab title="Without Streaming">
+    **cURL Example:**
 
-```json
-{
-  "model": "gpt-4o-mini",
-  "messages": [
-    {"role": "system", "content": "You are helpful."},
-    {"role": "user", "content": "Hello!"}
-  ],
-  "max_tokens": 100,
-  "temperature": 0.7,
-  "top_p": 1.0,
-  "stream": false,
-  "stop": ["\n"]
-}
-```
+    ```bash
+    curl -X POST "https://api.pureai-api.com/v1/chat/completions" \
+      -H "x-api-key: YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "gpt-4o-mini",
+        "messages": [
+          {"role": "system", "content": "You are helpful."},
+          {"role": "user", "content": "Hello!"}
+        ],
+        "max_tokens": 100,
+        "temperature": 0.7,
+        "stream": false
+      }'
+    ```
+
+    **Response:**
+
+    ```json
+    {
+      "id": "chatcmpl-abc123",
+      "object": "chat.completion",
+      "created": 1699123456,
+      "model": "gpt-4o-mini",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Hello! How can I help you today?"
+          },
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 12,
+        "completion_tokens": 9,
+        "total_tokens": 21,
+        "input_cost_usd": 0.000018,
+        "output_cost_usd": 0.000027,
+        "total_cost_usd": 0.000045,
+        "latency_ms": 523.4,
+        "ttft_ms": 215.2
+      }
+    }
+    ```
+  </Tab>
+
+  <Tab title="With Streaming">
+    **cURL Example:**
+
+    ```bash
+    curl -X POST "https://api.pureai-api.com/v1/chat/completions" \
+      -H "x-api-key: YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "gpt-4o-mini",
+        "messages": [
+          {"role": "user", "content": "Hello!"}
+        ],
+        "max_tokens": 100,
+        "temperature": 0.7,
+        "stream": true
+      }'
+    ```
+
+    **Response (Server-Sent Events):**
+
+    ```
+    data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"role":"assistant"}}]}
+
+    data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Hello"}}]}
+
+    data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"!"}}]}
+
+    data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+    data: [DONE]
+    ```
+  </Tab>
+</Tabs>
 
 **Parameters:**
 
@@ -51,39 +120,8 @@ Create a chat completion.
 | `max_tokens` | `integer` | No | Maximum tokens to generate |
 | `temperature` | `float` | No | Randomness (0-2) |
 | `top_p` | `float` | No | Nucleus sampling |
-| `stream` | `boolean` | No | Enable streaming |
+| `stream` | `boolean` | No | Enable streaming (default: false) |
 | `stop` | `array` | No | Stop sequences |
-
-**Response:**
-
-```json
-{
-  "id": "chatcmpl-abc123",
-  "object": "chat.completion",
-  "created": 1699123456,
-  "model": "gpt-4o-mini",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "Hello! How can I help you today?"
-      },
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 12,
-    "completion_tokens": 9,
-    "total_tokens": 21,
-    "input_cost_usd": 0.000018,
-    "output_cost_usd": 0.000027,
-    "total_cost_usd": 0.000045,
-    "latency_ms": 523.4,
-    "ttft_ms": 215.2
-  }
-}
-```
 
 ---
 
@@ -91,17 +129,80 @@ Create a chat completion.
 
 Create a text completion.
 
-**Request:**
+<Tabs>
+  <Tab title="Without Streaming">
+    **cURL Example:**
 
-```json
-{
-  "model": "gpt-4o-mini",
-  "prompt": "The capital of France is",
-  "max_tokens": 50,
-  "temperature": 0.7,
-  "stop": ["."]
-}
-```
+    ```bash
+    curl -X POST "https://api.pureai-api.com/v1/completions" \
+      -H "x-api-key: YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "gpt-4o-mini",
+        "prompt": "The capital of France is",
+        "max_tokens": 50,
+        "temperature": 0.7,
+        "stream": false
+      }'
+    ```
+
+    **Response:**
+
+    ```json
+    {
+      "id": "cmpl-abc123",
+      "object": "text_completion",
+      "created": 1699123456,
+      "model": "gpt-4o-mini",
+      "choices": [
+        {
+          "index": 0,
+          "text": " Paris",
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 5,
+        "completion_tokens": 1,
+        "total_tokens": 6,
+        "input_cost_usd": 0.000008,
+        "output_cost_usd": 0.000003,
+        "total_cost_usd": 0.000011,
+        "latency_ms": 312.1
+      }
+    }
+    ```
+  </Tab>
+
+  <Tab title="With Streaming">
+    **cURL Example:**
+
+    ```bash
+    curl -X POST "https://api.pureai-api.com/v1/completions" \
+      -H "x-api-key: YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "gpt-4o-mini",
+        "prompt": "Hello",
+        "max_tokens": 1024,
+        "temperature": 0.7,
+        "stream": true
+      }'
+    ```
+
+    **Response (Server-Sent Events):**
+
+    ```
+    data: {"id":"cmpl-abc","object":"text_completion.chunk","choices":[{"index":0,"text":"Hello"}]}
+
+    data: {"id":"cmpl-abc","object":"text_completion.chunk","choices":[{"index":0,"text":" there"}]}
+
+    data: {"id":"cmpl-abc","object":"text_completion.chunk","choices":[{"index":0,"text":"!","finish_reason":"stop"}]}
+
+    data: [DONE]
+    ```
+  </Tab>
+</Tabs>
 
 **Parameters:**
 
@@ -110,35 +211,10 @@ Create a text completion.
 | `model` | `string` | Yes | Model identifier |
 | `prompt` | `string` | Yes | Text prompt |
 | `max_tokens` | `integer` | No | Maximum tokens |
-| `temperature` | `float` | No | Randomness |
+| `temperature` | `float` | No | Randomness (0-2) |
+| `top_p` | `float` | No | Nucleus sampling |
+| `stream` | `boolean` | No | Enable streaming (default: false) |
 | `stop` | `array` | No | Stop sequences |
-
-**Response:**
-
-```json
-{
-  "id": "cmpl-abc123",
-  "object": "text_completion",
-  "created": 1699123456,
-  "model": "gpt-4o-mini",
-  "choices": [
-    {
-      "index": 0,
-      "text": " Paris",
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 5,
-    "completion_tokens": 1,
-    "total_tokens": 6,
-    "input_cost_usd": 0.000008,
-    "output_cost_usd": 0.000003,
-    "total_cost_usd": 0.000011,
-    "latency_ms": 312.1
-  }
-}
-```
 
 ---
 
@@ -249,6 +325,93 @@ data: [DONE]
 ## Rate Limits
 
 Rate limits are applied per API key. When exceeded, you'll receive a 429 response with `retry_after` header.
+
+---
+
+## Custom Deployments
+
+Use your own deployed models on PureAI's GPU infrastructure. When you create a deployment in the PureAI Console, you get a unique model ID that you can use with the `pureai/` prefix.
+
+### How to Use
+
+1. Deploy your model on the [PureAI Console](https://www.pureai.com.br/)
+2. Get the model ID from the deployment (e.g., `gemma-3-4b-it`)
+3. Use `pureai/{model-id}` in your API requests
+
+<Tabs>
+  <Tab title="Without Streaming">
+    ```bash
+    curl -X POST "https://api.pureai-api.com/v1/completions" \
+      -H "x-api-key: YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "pureai/gemma-3-4b-it",
+        "prompt": "Hello",
+        "max_tokens": 1024,
+        "temperature": 0.7,
+        "stream": false
+      }'
+    ```
+  </Tab>
+
+  <Tab title="With Streaming">
+    ```bash
+    curl -X POST "https://api.pureai-api.com/v1/completions" \
+      -H "x-api-key: YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "pureai/gemma-3-4b-it",
+        "prompt": "Hello",
+        "max_tokens": 1024,
+        "temperature": 0.7,
+        "stream": true
+      }'
+    ```
+  </Tab>
+
+  <Tab title="Chat Completions">
+    ```bash
+    curl -X POST "https://api.pureai-api.com/v1/chat/completions" \
+      -H "x-api-key: YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "pureai/gemma-3-4b-it",
+        "messages": [
+          {"role": "user", "content": "Hello!"}
+        ],
+        "max_tokens": 1024,
+        "temperature": 0.7
+      }'
+    ```
+  </Tab>
+</Tabs>
+
+### Python SDK
+
+```python
+from lunar import Lunar
+
+client = Lunar()
+
+# Using your deployed model
+response = client.chat.completions.create(
+    model="pureai/gemma-3-4b-it",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+
+# Text completions with streaming
+for chunk in client.completions.create(
+    model="pureai/DeepSeek-R1-Distill-Llama-8B",
+    prompt="Explain quantum computing",
+    max_tokens=1024,
+    stream=True
+):
+    print(chunk.choices[0].text, end="")
+```
+
+<Note>
+The model ID in the `pureai/` prefix is the exact name of your deployed model. You can find this in the PureAI Console after creating a deployment.
+</Note>
 
 ---
 
