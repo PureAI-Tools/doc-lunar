@@ -279,6 +279,136 @@ List providers for a model.
 
 ---
 
+### POST /v1/router
+
+Intelligent routing endpoint that automatically selects the best model for your request based on the task complexity, cost optimization, and performance requirements.
+
+<Tabs>
+  <Tab title="Auto Mode">
+    Uses all available models from your tenant with intelligent profile selection:
+
+    ```bash
+    curl -X POST "https://api.pureai-api.com/v1/router" \
+      -H "x-api-key: YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "messages": [
+          {"role": "user", "content": "Write a haiku about programming"}
+        ],
+        "execute": true
+      }'
+    ```
+  </Tab>
+
+  <Tab title="Restricted Mode">
+    Choose from specific models only:
+
+    ```bash
+    curl -X POST "https://api.pureai-api.com/v1/router" \
+      -H "x-api-key: YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "messages": [
+          {"role": "user", "content": "Write Python code to sort a list"}
+        ],
+        "models": ["gpt-4o-mini", "codestral-latest"],
+        "cost_weight": 0.5,
+        "execute": true
+      }'
+    ```
+  </Tab>
+
+  <Tab title="Decision Only">
+    Get routing decision without executing the request:
+
+    ```bash
+    curl -X POST "https://api.pureai-api.com/v1/router" \
+      -H "x-api-key: YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "messages": [
+          {"role": "user", "content": "What is the capital of Brazil?"}
+        ],
+        "execute": false
+      }'
+    ```
+
+    **Response:**
+
+    ```json
+    {
+      "selected_model": "gpt-4o-mini",
+      "reasoning": "Simple factual question, low complexity",
+      "confidence": 0.95
+    }
+    ```
+  </Tab>
+
+  <Tab title="With Streaming">
+    ```bash
+    curl -X POST "https://api.pureai-api.com/v1/router" \
+      -H "x-api-key: YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "messages": [
+          {"role": "user", "content": "Tell me a joke"}
+        ],
+        "stream": true,
+        "execute": true
+      }'
+    ```
+  </Tab>
+</Tabs>
+
+**Parameters:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `messages` | `array` | Yes | Conversation messages |
+| `execute` | `boolean` | No | Execute the request after routing (default: true) |
+| `models` | `array` | No | Restrict selection to specific models |
+| `cost_weight` | `float` | No | Cost optimization weight 0-1 (0 = quality, 1 = cost) |
+| `stream` | `boolean` | No | Enable streaming response |
+| `max_tokens` | `integer` | No | Maximum tokens to generate |
+| `temperature` | `float` | No | Randomness (0-2) |
+
+**Response (with execute: true):**
+
+```json
+{
+  "id": "router-abc123",
+  "object": "chat.completion",
+  "model": "gpt-4o-mini",
+  "routing": {
+    "selected_model": "gpt-4o-mini",
+    "reasoning": "Simple conversational request",
+    "confidence": 0.92
+  },
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Here's a programming haiku..."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 15,
+    "completion_tokens": 25,
+    "total_tokens": 40,
+    "total_cost_usd": 0.00003
+  }
+}
+```
+
+<Note>
+The router analyzes your prompt to determine complexity, required capabilities (code, math, reasoning, etc.), and selects the most appropriate model balancing quality and cost.
+</Note>
+
+---
+
 ## Message Object
 
 | Field | Type | Description |
