@@ -1,11 +1,9 @@
 ---
 title: 'Exceptions'
-description: 'Error handling and exception types in Lunar SDK'
+description: 'Error handling and exception types in the Lunar SDK'
 ---
 
-# Exceptions
-
-The Lunar SDK provides a comprehensive exception hierarchy for error handling. Exceptions are categorized into two groups based on whether fallback should be attempted.
+The Lunar SDK provides a structured exception hierarchy. Errors are categorized into two groups: **non-fallback** errors (your request is wrong) and **fallback-able** errors (temporary infrastructure issue — the SDK can try another model).
 
 ## Exception Hierarchy
 
@@ -17,19 +15,19 @@ LunarError (base)
 │   ├── PermissionDeniedError (403)
 │   ├── NotFoundError (404)
 │   ├── UnprocessableEntityError (422)
-│   ├── ChatNotSupportedError (400 - special)
+│   ├── ChatNotSupportedError (400)
 │   ├── RateLimitError (429)
-│   ├── ServerError (5xx)
-│   │   ├── ServiceUnavailableError (503)
-│   │   └── GatewayTimeoutError (504)
-├── ConnectionError (network)
+│   └── ServerError (5xx)
+│       ├── ServiceUnavailableError (503)
+│       └── GatewayTimeoutError (504)
+├── ConnectionError (network failure)
 ├── TimeoutError (request timeout)
 └── EvaluationError (eval failures)
 ```
 
 ## Non-Fallback Errors
 
-These errors indicate problems with your request. Fallback to another model won't help.
+These indicate problems with your request. The SDK will **not** attempt fallback — retrying with a different model won't help.
 
 ### BadRequestError (400)
 
@@ -46,27 +44,34 @@ try:
         messages=[]  # Invalid: empty messages
     )
 except BadRequestError as e:
-    print(f"Bad request: {e}")
-    print(f"Status code: {e.status_code}")  # 400
+    print(f"Bad request: {e}")         # [400] Invalid request...
+    print(f"Status: {e.status_code}")  # 400
 ```
 
 ### AuthenticationError (401)
 
-Invalid or missing API key/JWT.
+Invalid or missing API key / JWT.
 
 ```python
 from lunar import Lunar, AuthenticationError
 
 try:
     client = Lunar(api_key="invalid-key")
-    response = client.chat.completions.create(...)
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": "Hello"}]
+    )
 except AuthenticationError as e:
     print(f"Auth failed: {e}")
 ```
 
+<Note>
+Also raised at initialization if neither `api_key`/`jwt` parameter nor `LUNAR_API_KEY`/`LUNAR_JWT` environment variable is set.
+</Note>
+
 ### PermissionDeniedError (403)
 
-Access denied to the resource.
+Access denied. Your API key doesn't have permission for this resource.
 
 ```python
 from lunar import PermissionDeniedError
@@ -103,22 +108,22 @@ from lunar import UnprocessableEntityError
 try:
     response = client.chat.completions.create(
         model="gpt-4o-mini",
-        messages=[{"role": "invalid", "content": "Hello"}]  # Invalid role
+        messages=[{"role": "invalid_role", "content": "Hello"}]
     )
 except UnprocessableEntityError as e:
     print(f"Validation error: {e}")
 ```
 
-### ChatNotSupportedError
+### ChatNotSupportedError (400)
 
-Model doesn't support chat completions.
+The model doesn't have a chat template configured. Use `/v1/completions` instead.
 
 ```python
 from lunar import ChatNotSupportedError
 
 try:
     response = client.chat.completions.create(
-        model="some-completion-only-model",
+        model="pureai/some-base-model",
         messages=[{"role": "user", "content": "Hello"}]
     )
 except ChatNotSupportedError as e:
@@ -129,11 +134,11 @@ except ChatNotSupportedError as e:
 
 ## Fallback-Triggering Errors
 
-These errors indicate temporary issues. The SDK will try fallback models if configured.
+These indicate temporary infrastructure issues. When fallbacks are configured, the SDK automatically tries the next model.
 
 ### RateLimitError (429)
 
-Rate limit exceeded.
+Rate limit or quota exceeded. Another provider may have capacity.
 
 ```python
 from lunar import RateLimitError
@@ -142,12 +147,12 @@ try:
     response = client.chat.completions.create(...)
 except RateLimitError as e:
     print(f"Rate limited: {e}")
-    print(f"Retry after: {e.retry_after} seconds")
+    print(f"Retry after: {e.retry_after}s")
 ```
 
 ### ServerError (5xx)
 
-Internal server error.
+Internal server error from the provider.
 
 ```python
 from lunar import ServerError
@@ -160,29 +165,11 @@ except ServerError as e:
 
 ### ServiceUnavailableError (503)
 
-Service temporarily unavailable.
-
-```python
-from lunar import ServiceUnavailableError
-
-try:
-    response = client.chat.completions.create(...)
-except ServiceUnavailableError as e:
-    print(f"Service unavailable: {e}")
-```
+Provider temporarily unavailable.
 
 ### GatewayTimeoutError (504)
 
-Gateway timeout.
-
-```python
-from lunar import GatewayTimeoutError
-
-try:
-    response = client.chat.completions.create(...)
-except GatewayTimeoutError as e:
-    print(f"Gateway timeout: {e}")
-```
+Gateway timeout from the provider.
 
 ### ConnectionError
 
@@ -199,7 +186,7 @@ except ConnectionError as e:
 
 ### TimeoutError
 
-Request timed out.
+Request timed out (configurable via `timeout` parameter, default 60s).
 
 ```python
 from lunar import TimeoutError
@@ -208,6 +195,26 @@ try:
     response = client.chat.completions.create(...)
 except TimeoutError as e:
     print(f"Request timeout: {e}")
+```
+
+## EvaluationError
+
+Raised when an evaluation run fails completely.
+
+```python
+from lunar import EvaluationError
+
+try:
+    result = client.evals.run(
+        name="Test",
+        dataset=[...],
+        task=my_task,
+        scorers=[...]
+    )
+except EvaluationError as e:
+    print(f"Eval failed: {e}")
+    print(f"Failed: {e.failed_count}/{e.total_count}")
+    print(f"Last error: {e.last_error}")
 ```
 
 ## Error Handling Patterns
@@ -220,7 +227,10 @@ from lunar import Lunar, APIError
 client = Lunar()
 
 try:
-    response = client.chat.completions.create(...)
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
 except APIError as e:
     print(f"API error [{e.status_code}]: {e}")
     if e.response_body:
@@ -262,55 +272,74 @@ try:
         messages=[{"role": "user", "content": "Hello!"}]
     )
 except BadRequestError as e:
-    # Fix your request
+    # Fix your request parameters
     print(f"Invalid request: {e}")
 except AuthenticationError as e:
     # Check your API key
-    print(f"Authentication failed: {e}")
+    print(f"Auth failed: {e}")
 except RateLimitError as e:
     # Wait and retry
-    print(f"Rate limited. Retry after {e.retry_after}s")
+    print(f"Rate limited, retry after {e.retry_after}s")
 except (ServerError, ConnectionError, TimeoutError) as e:
-    # Temporary issue - retry later
+    # Temporary issue — retry later
     print(f"Temporary error: {e}")
 except LunarError as e:
-    # Catch-all for other Lunar errors
+    # Catch-all for any other Lunar error
     print(f"Unexpected error: {e}")
 ```
 
 ### With Fallbacks
 
-When fallbacks are configured, fallback-triggering errors are handled automatically:
+When fallbacks are configured, fallback-triggering errors are handled automatically by the SDK:
 
 ```python
-# SDK automatically tries fallbacks for RateLimitError, ServerError, etc.
+# The SDK tries each model in order.
+# Only raises if ALL models fail.
 response = client.chat.completions.create(
     model="gpt-4o-mini",
     messages=[{"role": "user", "content": "Hello!"}],
     fallbacks=["claude-3-haiku", "llama-3.1-8b"]
 )
+```
 
-# Only raises if ALL models fail
+You can also configure fallbacks globally at client initialization:
+
+```python
+client = Lunar(
+    api_key="pk_live_YOUR_KEY",
+    fallbacks={
+        "gpt-4o-mini": ["claude-3-haiku", "llama-3.1-8b"],
+        "gpt-4o": ["claude-3-5-sonnet"],
+    }
+)
 ```
 
 ## Exception Properties
 
-### APIError Properties
+### APIError
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `message` | `str` | Error message |
-| `status_code` | `int` | HTTP status code |
-| `response_body` | `dict` | Full response body |
+| `status_code` | `int \| None` | HTTP status code |
+| `response_body` | `dict \| None` | Full response body from API |
 
-### RateLimitError Properties
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `retry_after` | `float` | Seconds to wait |
-
-### ChatNotSupportedError Properties
+### RateLimitError
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `model` | `str` | The model that doesn't support chat |
+| `retry_after` | `float \| None` | Seconds to wait before retrying |
+
+### ChatNotSupportedError
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `model` | `str \| None` | The model that doesn't support chat |
+
+### EvaluationError
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `failed_count` | `int` | Number of failed tasks |
+| `total_count` | `int` | Total number of tasks |
+| `last_error` | `str \| None` | Last error message |

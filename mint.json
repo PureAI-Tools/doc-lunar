@@ -1,15 +1,14 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "name": "PureAI",
+  "name": "Lunar",
   "logo": {
     "light": "/logo/light.svg",
     "dark": "/logo/dark.svg"
   },
   "favicon": "/logo/all_logo.svg",
-  "theme": "prism",
   "modeToggle": {
-    "default": "light",
-    "isHidden": false
+    "default": "dark",
+    "isHidden": true
   },
   "customCss": [
     "/styles/globals.css"
@@ -21,34 +20,38 @@
     }
   },
   "colors": {
-    "primary": "#8B5CF6",
-    "light": "#FAFAFA",
-    "dark": "#0A0A0B",
+    "primary": "#A1A1AA",
+    "light": "#A1A1AA",
+    "dark": "#A1A1AA",
     "anchors": {
-      "from": "#8B5CF6",
-      "to": "#A855F7"
+      "from": "#FAFAFA",
+      "to": "#A1A1AA"
+    },
+    "background": {
+      "light": "#0A0A0A",
+      "dark": "#0A0A0A"
     }
   },
   "topbarLinks": [
     {
       "name": "Support",
-      "url": "mailto:contato@pureai.com.br"
+      "url": "mailto:contato@lunar.dev"
     }
   ],
   "topbarCtaButton": {
-    "name": "Go to PureAI",
-    "url": "https://www.pureai.com.br/"
+    "name": "Go to Console",
+    "url": "https://console.lunar.dev/"
   },
   "anchors": [
     {
       "name": "Community",
       "icon": "discord",
-      "url": "https://discord.gg/8eF9v78Ndv"
+      "url": "https://discord.gg/thyZx5GkFV"
     },
     {
       "name": "GitHub",
       "icon": "github",
-      "url": "https://github.com/pureai-ecosystem"
+      "url": "https://github.com/lunar-ai"
     }
   ],
   "navigation": [
@@ -105,45 +108,16 @@
         "pricing/instance-tiers",
         "pricing/billing"
       ]
-    },
-    {
-      "group": "PureCPP",
-      "pages": [
-        "setup",
-        {
-          "group": "Data Loaders",
-          "pages": [
-            "purecpp/loaders/introduction",
-            "purecpp/loaders/webloader",
-            "purecpp/loaders/txtloader",
-            "purecpp/loaders/pdfloader",
-            "purecpp/loaders/docxloader"
-          ]
-        },
-        "purecpp/cleaner/cleanregex",
-        {
-          "group": "Chunks",
-          "pages": [
-            "purecpp/chunks/introduction",
-            "purecpp/chunks/chunkdefault",
-            "purecpp/chunks/chunkcount",
-            "purecpp/chunks/chunkquery",
-            "purecpp/chunks/chunksimilarity"
-          ]
-        },
-        "purecpp/metadata/metadata",
-        "purecpp/embbeding/embbeding"
-      ]
     }
   ],
   "footerSocials": {
-    "x": "https://x.com/pureaiofficial",
-    "github": "https://github.com/pureai-ecosystem",
-    "linkedin": "https://linkedin.com/company/pureai-official"
+    "x": "https://x.com/lunaraiofficial",
+    "github": "https://github.com/lunar-ai",
+    "linkedin": "https://linkedin.com/company/lunar-ai"
   },
   "seo": {
-    "title": "PureAI Documentation",
-    "description": "Official docs for Lunar SDK, GPU Instances, and PureCPP by PureAI",
+    "title": "Lunar Documentation",
+    "description": "Official docs for Lunar SDK, GPU Instances, and PureCPP. Distill, route, and deploy LLMs.",
     "image": "/images/social-card.png"
   }
 }

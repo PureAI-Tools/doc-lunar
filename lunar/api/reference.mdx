@@ -1,9 +1,7 @@
 ---
 title: 'API Reference'
-description: 'Complete API reference for the Lunar SDK'
+description: 'Complete REST API reference for the Lunar platform'
 ---
-
-# API Reference
 
 ## Base URL
 
@@ -13,25 +11,53 @@ https://api.pureai-api.com
 
 ## Authentication
 
-All requests require an API key via header:
+All inference endpoints accept two authentication methods:
 
+| Method | Header | Format |
+|--------|--------|--------|
+| API Key | `x-api-key` | `pk_live_...` |
+| JWT | `Authorization` | `Bearer <token>` |
+
+```bash
+# API Key
+curl -H "x-api-key: pk_live_YOUR_KEY" ...
+
+# JWT (from Cognito)
+curl -H "Authorization: Bearer eyJhbG..." ...
 ```
-x-api-key: {your-api-key}
-```
 
-## Endpoints
+<Note>
+API keys are created in the [Lunar Console](https://console.lunar.dev/). The SDK reads from the `LUNAR_API_KEY` environment variable by default.
+</Note>
 
-### POST /v1/chat/completions
+---
 
-Create a chat completion.
+## POST /v1/chat/completions
+
+Create a chat completion. OpenAI-compatible.
+
+**Request Body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `model` | `string` | Yes | Model ID (e.g. `gpt-4o-mini`) or `provider/model` to force a provider (e.g. `openai/gpt-4o-mini`) |
+| `messages` | `array` | Yes | Array of `{role, content}` objects. Roles: `system`, `user`, `assistant` |
+| `stream` | `boolean` | No | Enable SSE streaming (default: `false`) |
+| `max_tokens` | `integer` | No | Maximum tokens to generate |
+| `temperature` | `float` | No | Sampling temperature (0-2, default: 0.7) |
+| `top_p` | `float` | No | Nucleus sampling (default: 1.0) |
+| `stop` | `array` | No | Stop sequences |
+| `presence_penalty` | `float` | No | Presence penalty (default: 0.0) |
+| `frequency_penalty` | `float` | No | Frequency penalty (default: 0.0) |
+| `n` | `integer` | No | Number of choices (default: 1) |
+| `provider` | `string` | No | Force a specific provider |
+| `fallbacks` | `array` | No | Fallback models if primary fails (SDK only) |
 
 <Tabs>
-  <Tab title="Without Streaming">
-    **cURL Example:**
-
+  <Tab title="Standard">
     ```bash
     curl -X POST "https://api.pureai-api.com/v1/chat/completions" \
-      -H "x-api-key: YOUR_API_KEY" \
+      -H "x-api-key: pk_live_YOUR_KEY" \
       -H "Content-Type: application/json" \
       -d '{
         "model": "gpt-4o-mini",
@@ -39,9 +65,7 @@ Create a chat completion.
           {"role": "system", "content": "You are helpful."},
           {"role": "user", "content": "Hello!"}
         ],
-        "max_tokens": 100,
-        "temperature": 0.7,
-        "stream": false
+        "temperature": 0.7
       }'
     ```
 
@@ -49,9 +73,8 @@ Create a chat completion.
 
     ```json
     {
-      "id": "chatcmpl-abc123",
+      "id": "chatcmpl_a1b2c3d4",
       "object": "chat.completion",
-      "created": 1699123456,
       "model": "gpt-4o-mini",
       "choices": [
         {
@@ -69,6 +92,7 @@ Create a chat completion.
         "total_tokens": 21,
         "input_cost_usd": 0.000018,
         "output_cost_usd": 0.000027,
+        "cache_input_cost_usd": 0.0,
         "total_cost_usd": 0.000045,
         "latency_ms": 523.4,
         "ttft_ms": 215.2
@@ -77,20 +101,14 @@ Create a chat completion.
     ```
   </Tab>
 
-  <Tab title="With Streaming">
-    **cURL Example:**
-
+  <Tab title="Streaming">
     ```bash
     curl -X POST "https://api.pureai-api.com/v1/chat/completions" \
-      -H "x-api-key: YOUR_API_KEY" \
+      -H "x-api-key: pk_live_YOUR_KEY" \
       -H "Content-Type: application/json" \
       -d '{
         "model": "gpt-4o-mini",
-        "messages": [
-          {"role": "user", "content": "Hello!"}
-        ],
-        "max_tokens": 100,
-        "temperature": 0.7,
+        "messages": [{"role": "user", "content": "Hello!"}],
         "stream": true
       }'
     ```
@@ -98,51 +116,79 @@ Create a chat completion.
     **Response (Server-Sent Events):**
 
     ```
-    data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"role":"assistant"}}]}
+    data: {"id":"chatcmpl_a1b2","object":"chat.completion.chunk","model":"gpt-4o-mini","choices":[{"index":0,"delta":{"role":"assistant"}}]}
 
-    data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Hello"}}]}
+    data: {"id":"chatcmpl_a1b2","object":"chat.completion.chunk","model":"gpt-4o-mini","choices":[{"index":0,"delta":{"content":"Hello"}}]}
 
-    data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"!"}}]}
+    data: {"id":"chatcmpl_a1b2","object":"chat.completion.chunk","model":"gpt-4o-mini","choices":[{"index":0,"delta":{"content":"!"}}]}
 
-    data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+    data: {"id":"chatcmpl_a1b2","object":"chat.completion.chunk","model":"gpt-4o-mini","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
 
     data: [DONE]
     ```
   </Tab>
+
+  <Tab title="Force Provider">
+    Use the `provider/model` format to bypass routing and send directly to a specific provider:
+
+    ```bash
+    curl -X POST "https://api.pureai-api.com/v1/chat/completions" \
+      -H "x-api-key: pk_live_YOUR_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "openai/gpt-4o-mini",
+        "messages": [{"role": "user", "content": "Hello!"}]
+      }'
+    ```
+  </Tab>
+
+  <Tab title="Custom Deployment">
+    Use the `pureai/` prefix to use your own GPU-deployed models:
+
+    ```bash
+    curl -X POST "https://api.pureai-api.com/v1/chat/completions" \
+      -H "x-api-key: pk_live_YOUR_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "pureai/gemma-3-4b-it",
+        "messages": [{"role": "user", "content": "Hello!"}]
+      }'
+    ```
+
+    <Note>
+    Custom deployments use inference-time pricing (GPU time) instead of per-token pricing.
+    </Note>
+  </Tab>
 </Tabs>
-
-**Parameters:**
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `model` | `string` | Yes | Model identifier |
-| `messages` | `array` | Yes | Conversation messages |
-| `max_tokens` | `integer` | No | Maximum tokens to generate |
-| `temperature` | `float` | No | Randomness (0-2) |
-| `top_p` | `float` | No | Nucleus sampling |
-| `stream` | `boolean` | No | Enable streaming (default: false) |
-| `stop` | `array` | No | Stop sequences |
 
 ---
 
-### POST /v1/completions
+## POST /v1/completions
 
-Create a text completion.
+Create a text completion (legacy endpoint).
+
+**Request Body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `model` | `string` | Yes | Model ID or `provider/model` |
+| `prompt` | `string` | Yes | Text prompt |
+| `max_tokens` | `integer` | No | Maximum tokens (default: 1024) |
+| `temperature` | `float` | No | Sampling temperature (default: 0.7) |
+| `stop` | `array` | No | Stop sequences |
+| `stream` | `boolean` | No | Enable SSE streaming (default: `false`) |
 
 <Tabs>
-  <Tab title="Without Streaming">
-    **cURL Example:**
-
+  <Tab title="Standard">
     ```bash
     curl -X POST "https://api.pureai-api.com/v1/completions" \
-      -H "x-api-key: YOUR_API_KEY" \
+      -H "x-api-key: pk_live_YOUR_KEY" \
       -H "Content-Type: application/json" \
       -d '{
         "model": "gpt-4o-mini",
         "prompt": "The capital of France is",
         "max_tokens": 50,
-        "temperature": 0.7,
-        "stream": false
+        "temperature": 0.7
       }'
     ```
 
@@ -150,42 +196,39 @@ Create a text completion.
 
     ```json
     {
-      "id": "cmpl-abc123",
+      "id": "cmpl_a1b2c3d4",
       "object": "text_completion",
-      "created": 1699123456,
       "model": "gpt-4o-mini",
       "choices": [
         {
           "index": 0,
-          "text": " Paris",
+          "text": " Paris, the city of light.",
           "finish_reason": "stop"
         }
       ],
       "usage": {
         "prompt_tokens": 5,
-        "completion_tokens": 1,
-        "total_tokens": 6,
+        "completion_tokens": 7,
+        "total_tokens": 12,
         "input_cost_usd": 0.000008,
-        "output_cost_usd": 0.000003,
-        "total_cost_usd": 0.000011,
-        "latency_ms": 312.1
+        "output_cost_usd": 0.000021,
+        "total_cost_usd": 0.000029,
+        "latency_ms": 312.1,
+        "ttft_ms": 180.5
       }
     }
     ```
   </Tab>
 
-  <Tab title="With Streaming">
-    **cURL Example:**
-
+  <Tab title="Streaming">
     ```bash
     curl -X POST "https://api.pureai-api.com/v1/completions" \
-      -H "x-api-key: YOUR_API_KEY" \
+      -H "x-api-key: pk_live_YOUR_KEY" \
       -H "Content-Type: application/json" \
       -d '{
         "model": "gpt-4o-mini",
         "prompt": "Hello",
         "max_tokens": 1024,
-        "temperature": 0.7,
         "stream": true
       }'
     ```
@@ -193,137 +236,108 @@ Create a text completion.
     **Response (Server-Sent Events):**
 
     ```
-    data: {"id":"cmpl-abc","object":"text_completion.chunk","choices":[{"index":0,"text":"Hello"}]}
+    data: {"id":"cmpl_a1b2","object":"text_completion.chunk","choices":[{"index":0,"text":"Hello"}]}
 
-    data: {"id":"cmpl-abc","object":"text_completion.chunk","choices":[{"index":0,"text":" there"}]}
+    data: {"id":"cmpl_a1b2","object":"text_completion.chunk","choices":[{"index":0,"text":" there"}]}
 
-    data: {"id":"cmpl-abc","object":"text_completion.chunk","choices":[{"index":0,"text":"!","finish_reason":"stop"}]}
+    data: {"id":"cmpl_a1b2","object":"text_completion.chunk","choices":[{"index":0,"text":"!","finish_reason":"stop"}]}
 
     data: [DONE]
     ```
   </Tab>
 </Tabs>
 
-**Parameters:**
+---
+
+## POST /v1/router
+
+Intelligent routing endpoint. Analyzes the prompt semantically and selects the optimal model using the UniRoute algorithm.
+
+**Request Body:**
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `model` | `string` | Yes | Model identifier |
-| `prompt` | `string` | Yes | Text prompt |
-| `max_tokens` | `integer` | No | Maximum tokens |
-| `temperature` | `float` | No | Randomness (0-2) |
-| `top_p` | `float` | No | Nucleus sampling |
-| `stream` | `boolean` | No | Enable streaming (default: false) |
-| `stop` | `array` | No | Stop sequences |
-
----
-
-### GET /v1/models
-
-List available models.
-
-**Response:**
-
-```json
-{
-  "object": "list",
-  "data": [
-    {
-      "id": "gpt-4o-mini",
-      "object": "model",
-      "created": 1699000000,
-      "owned_by": "openai"
-    },
-    {
-      "id": "claude-3-haiku",
-      "object": "model",
-      "created": 1699000000,
-      "owned_by": "anthropic"
-    }
-  ]
-}
-```
-
----
-
-### GET /v1/providers
-
-List providers for a model.
-
-**Query Parameters:**
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `model` | `string` | Yes | Model identifier |
-
-**Response:**
-
-```json
-{
-  "providers": [
-    {
-      "id": "openai",
-      "type": "primary",
-      "enabled": true,
-      "params": {}
-    },
-    {
-      "id": "groq",
-      "type": "backup",
-      "enabled": true,
-      "params": {}
-    }
-  ]
-}
-```
-
----
-
-### POST /v1/router
-
-Intelligent routing endpoint that automatically selects the best model for your request based on the task complexity, cost optimization, and performance requirements.
+| `messages` | `array` | Yes | Array of `{role, content}` objects (min 1) |
+| `execute` | `boolean` | No | Execute after routing (default: `true`). Set `false` to only get the routing decision |
+| `models` | `array` | No | Restrict routing to specific models (min 2). If omitted, uses all available models |
+| `cost_weight` | `float` | No | Cost penalty weight (default: 0.0). `0` = ignore cost, higher = prefer cheaper models |
+| `stream` | `boolean` | No | Enable SSE streaming when `execute=true` (default: `false`) |
+| `max_tokens` | `integer` | No | Maximum tokens when `execute=true` |
+| `temperature` | `float` | No | Temperature when `execute=true` (0-2) |
 
 <Tabs>
-  <Tab title="Auto Mode">
-    Uses all available models from your tenant with intelligent profile selection:
+  <Tab title="Auto Route + Execute">
+    Routes among all available models and executes:
 
     ```bash
     curl -X POST "https://api.pureai-api.com/v1/router" \
-      -H "x-api-key: YOUR_API_KEY" \
+      -H "x-api-key: pk_live_YOUR_KEY" \
       -H "Content-Type: application/json" \
       -d '{
         "messages": [
           {"role": "user", "content": "Write a haiku about programming"}
-        ],
-        "execute": true
+        ]
       }'
+    ```
+
+    **Response:**
+
+    ```json
+    {
+      "id": "router-abc123",
+      "object": "chat.completion",
+      "model": "gpt-4o-mini",
+      "routing": {
+        "selected_model": "gpt-4o-mini",
+        "selected_provider": "openai",
+        "expected_error": 0.12,
+        "cost_adjusted_score": 0.12,
+        "cluster_id": 3,
+        "reasoning": "Simple creative task — lightweight model sufficient"
+      },
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Lines of code align\nBugs emerge from morning mist\nFixed by afternoon"
+          },
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 10,
+        "completion_tokens": 18,
+        "total_tokens": 28,
+        "total_cost_usd": 0.00002
+      }
+    }
     ```
   </Tab>
 
-  <Tab title="Restricted Mode">
-    Choose from specific models only:
+  <Tab title="Restricted Models">
+    Route among specific models only:
 
     ```bash
     curl -X POST "https://api.pureai-api.com/v1/router" \
-      -H "x-api-key: YOUR_API_KEY" \
+      -H "x-api-key: pk_live_YOUR_KEY" \
       -H "Content-Type: application/json" \
       -d '{
         "messages": [
           {"role": "user", "content": "Write Python code to sort a list"}
         ],
         "models": ["gpt-4o-mini", "codestral-latest"],
-        "cost_weight": 0.5,
-        "execute": true
+        "cost_weight": 0.5
       }'
     ```
   </Tab>
 
   <Tab title="Decision Only">
-    Get routing decision without executing the request:
+    Get routing decision without executing:
 
     ```bash
     curl -X POST "https://api.pureai-api.com/v1/router" \
-      -H "x-api-key: YOUR_API_KEY" \
+      -H "x-api-key: pk_live_YOUR_KEY" \
       -H "Content-Type: application/json" \
       -d '{
         "messages": [
@@ -337,211 +351,124 @@ Intelligent routing endpoint that automatically selects the best model for your 
 
     ```json
     {
-      "selected_model": "gpt-4o-mini",
-      "reasoning": "Simple factual question, low complexity",
-      "confidence": 0.95
+      "id": "router-xyz",
+      "object": "chat.completion",
+      "model": "gpt-4o-mini",
+      "routing": {
+        "selected_model": "gpt-4o-mini",
+        "selected_provider": "openai",
+        "expected_error": 0.05,
+        "cost_adjusted_score": 0.05,
+        "cluster_id": 1,
+        "all_scores": {
+          "gpt-4o-mini": 0.05,
+          "gpt-4o": 0.03,
+          "mistral-small-latest": 0.08
+        },
+        "reasoning": "Simple factual question — lightweight model optimal"
+      },
+      "choices": []
     }
-    ```
-  </Tab>
-
-  <Tab title="With Streaming">
-    ```bash
-    curl -X POST "https://api.pureai-api.com/v1/router" \
-      -H "x-api-key: YOUR_API_KEY" \
-      -H "Content-Type: application/json" \
-      -d '{
-        "messages": [
-          {"role": "user", "content": "Tell me a joke"}
-        ],
-        "stream": true,
-        "execute": true
-      }'
     ```
   </Tab>
 </Tabs>
 
-**Parameters:**
+---
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `messages` | `array` | Yes | Conversation messages |
-| `execute` | `boolean` | No | Execute the request after routing (default: true) |
-| `models` | `array` | No | Restrict selection to specific models |
-| `cost_weight` | `float` | No | Cost optimization weight 0-1 (0 = quality, 1 = cost) |
-| `stream` | `boolean` | No | Enable streaming response |
-| `max_tokens` | `integer` | No | Maximum tokens to generate |
-| `temperature` | `float` | No | Randomness (0-2) |
+## GET /v1/router/profiles
 
-**Response (with execute: true):**
+List models that have semantic routing profiles available.
+
+```bash
+curl "https://api.pureai-api.com/v1/router/profiles" \
+  -H "x-api-key: pk_live_YOUR_KEY"
+```
+
+**Response:**
 
 ```json
 {
-  "id": "router-abc123",
-  "object": "chat.completion",
-  "model": "gpt-4o-mini",
-  "routing": {
-    "selected_model": "gpt-4o-mini",
-    "reasoning": "Simple conversational request",
-    "confidence": 0.92
-  },
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "Here's a programming haiku..."
-      },
-      "finish_reason": "stop"
-    }
+  "profiles": [
+    "gpt-4o",
+    "gpt-4o-mini",
+    "gpt-4-turbo",
+    "gpt-3.5-turbo",
+    "mistral-large-latest",
+    "mistral-small-latest"
   ],
-  "usage": {
-    "prompt_tokens": 15,
-    "completion_tokens": 25,
-    "total_tokens": 40,
-    "total_cost_usd": 0.00003
-  }
+  "count": 6
 }
 ```
 
-<Note>
-The router analyzes your prompt to determine complexity, required capabilities (code, math, reasoning, etc.), and selects the most appropriate model balancing quality and cost.
-</Note>
-
 ---
 
-## Message Object
+## GET /v1/providers
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `role` | `string` | `system`, `user`, or `assistant` |
-| `content` | `string` | Message content |
+List providers available for a model.
 
----
+**Query Parameters:**
 
-## Usage Object
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `model` | `string` | No | Model ID (defaults to `gpt-4o-mini`) |
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `prompt_tokens` | `integer` | Input token count |
-| `completion_tokens` | `integer` | Output token count |
-| `total_tokens` | `integer` | Total tokens |
-| `input_cost_usd` | `float` | Input cost (USD) |
-| `output_cost_usd` | `float` | Output cost (USD) |
-| `cache_input_cost_usd` | `float` | Cached input cost |
-| `total_cost_usd` | `float` | Total cost (USD) |
-| `latency_ms` | `float` | Request latency (ms) |
-| `ttft_ms` | `float` | Time to first token (ms) |
-
----
-
-## Streaming
-
-Set `stream: true` to receive Server-Sent Events:
-
+```bash
+curl "https://api.pureai-api.com/v1/providers?model=gpt-4o-mini" \
+  -H "x-api-key: pk_live_YOUR_KEY"
 ```
-data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"role":"assistant"}}]}
 
-data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Hello"}}]}
+**Response:**
 
-data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"!"}}]}
+```json
+[
+  {
+    "id": "openai",
+    "type": "primary",
+    "enabled": true,
+    "params": {}
+  },
+  {
+    "id": "groq",
+    "type": "backup",
+    "enabled": true,
+    "params": {}
+  }
+]
+```
 
-data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+---
 
-data: [DONE]
+## Response Objects
+
+### Usage
+
+Included in all completion responses. Extends the OpenAI format with cost and latency data.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `prompt_tokens` | `int` | Input token count |
+| `completion_tokens` | `int` | Output token count |
+| `total_tokens` | `int` | Total tokens |
+| `input_cost_usd` | `float` | Input cost in USD |
+| `output_cost_usd` | `float` | Output cost in USD |
+| `cache_input_cost_usd` | `float` | Cached input cost in USD |
+| `total_cost_usd` | `float` | Total cost in USD |
+| `latency_ms` | `float` | Total request latency in ms |
+| `ttft_ms` | `float` | Time to first token in ms |
+
+### Error Response
+
+```json
+{
+  "detail": "All providers failed for model 'invalid-model': Model not found"
+}
 ```
 
 ---
 
 ## Rate Limits
 
-Rate limits are applied per API key. When exceeded, you'll receive a 429 response with `retry_after` header.
-
----
-
-## Custom Deployments
-
-Use your own deployed models on PureAI's GPU infrastructure. When you create a deployment in the PureAI Console, you get a unique model ID that you can use with the `pureai/` prefix.
-
-### How to Use
-
-1. Deploy your model on the [PureAI Console](https://www.pureai.com.br/)
-2. Get the model ID from the deployment (e.g., `gemma-3-4b-it`)
-3. Use `pureai/{model-id}` in your API requests
-
-<Tabs>
-  <Tab title="Without Streaming">
-    ```bash
-    curl -X POST "https://api.pureai-api.com/v1/completions" \
-      -H "x-api-key: YOUR_API_KEY" \
-      -H "Content-Type: application/json" \
-      -d '{
-        "model": "pureai/gemma-3-4b-it",
-        "prompt": "Hello",
-        "max_tokens": 1024,
-        "temperature": 0.7,
-        "stream": false
-      }'
-    ```
-  </Tab>
-
-  <Tab title="With Streaming">
-    ```bash
-    curl -X POST "https://api.pureai-api.com/v1/completions" \
-      -H "x-api-key: YOUR_API_KEY" \
-      -H "Content-Type: application/json" \
-      -d '{
-        "model": "pureai/gemma-3-4b-it",
-        "prompt": "Hello",
-        "max_tokens": 1024,
-        "temperature": 0.7,
-        "stream": true
-      }'
-    ```
-  </Tab>
-
-  <Tab title="Chat Completions">
-    ```bash
-    curl -X POST "https://api.pureai-api.com/v1/chat/completions" \
-      -H "x-api-key: YOUR_API_KEY" \
-      -H "Content-Type: application/json" \
-      -d '{
-        "model": "pureai/gemma-3-4b-it",
-        "messages": [
-          {"role": "user", "content": "Hello!"}
-        ],
-        "max_tokens": 1024,
-        "temperature": 0.7
-      }'
-    ```
-  </Tab>
-</Tabs>
-
-### Python SDK
-
-```python
-from lunar import Lunar
-
-client = Lunar()
-
-# Using your deployed model
-response = client.chat.completions.create(
-    model="pureai/gemma-3-4b-it",
-    messages=[{"role": "user", "content": "Hello!"}]
-)
-
-# Text completions with streaming
-for chunk in client.completions.create(
-    model="pureai/DeepSeek-R1-Distill-Llama-8B",
-    prompt="Explain quantum computing",
-    max_tokens=1024,
-    stream=True
-):
-    print(chunk.choices[0].text, end="")
-```
-
-<Note>
-The model ID in the `pureai/` prefix is the exact name of your deployed model. You can find this in the PureAI Console after creating a deployment.
-</Note>
+Rate limits are applied per API key. When exceeded, you receive a `429` response with a `retry_after` field in the body.
 
 ---
 
@@ -550,13 +477,31 @@ The model ID in the `pureai/` prefix is the exact name of your deployed model. Y
 ```python
 from lunar import Lunar
 
-client = Lunar(api_key="your-key")
+client = Lunar(api_key="pk_live_YOUR_KEY")
 
 # Chat completions
 response = client.chat.completions.create(
     model="gpt-4o-mini",
     messages=[{"role": "user", "content": "Hello!"}]
 )
+print(response.choices[0].message.content)
+print(f"Cost: ${response.usage.total_cost_usd}")
+
+# With fallbacks
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello!"}],
+    fallbacks=["claude-3-haiku", "llama-3.1-8b"]
+)
+
+# Streaming
+for chunk in client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello!"}],
+    stream=True
+):
+    if chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="")
 
 # Text completions
 response = client.completions.create(

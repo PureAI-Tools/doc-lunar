@@ -1,36 +1,382 @@
-/* Define as variáveis de cor para o tema */
+/* Lunar Docs — Vercel-inspired clean dark theme */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+
 :root {
-  --primary: 139 92 246;
-  --primary-light: 250 250 250;
-  --primary-dark: 10 10 11;
-  --background-light: 255 255 255;
-  --background-dark: 10 10 11;
-  --gray-50: 247 245 250;
-  --gray-100: 242 240 245;
-  --gray-200: 226 225 230;
-  --gray-300: 210 208 213;
-  --gray-400: 162 161 166;
-  --gray-500: 116 114 119;
-  --gray-600: 84 82 87;
-  --gray-700: 66 65 70;
-  --gray-800: 41 40 44;
-  --gray-900: 27 25 30;
-  --gray-950: 14 13 17;
+  --primary: 255 255 255;
+  --primary-light: 255 255 255;
+  --primary-dark: 255 255 255;
+  --background-light: 10 10 10;
+  --background-dark: 10 10 10;
 }
 
-/* Aplica o nosso gradiente de fundo à página inteira */
-html {
-  /* Cor sólida como fallback caso o gradiente não carregue */
-  background-color: rgb(var(--background-light));
+/* ===== BASE ===== */
 
-  /* O gradiente desejado */
-  background-image: radial-gradient(circle at top left, rgba(139, 92, 246, 0.08) 0%, transparent 40%);
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+html,
+html.dark,
+html.light {
+  background-color: #0a0a0a !important;
+  background-image: none !important;
+  color: #ededed !important;
 }
 
-/* Em modo escuro, o fundo será preto sólido como definido nas variáveis */
-html.dark {
-  background-image: none;
-  background-color: rgb(var(--background-dark));
+body {
+  background-color: #0a0a0a !important;
+  color: #ededed !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Body text */
+p, li, span, td, label, summary, blockquote {
+  color: #a1a1aa;
+}
+
+/* Secondary/muted text */
+[class*="description"],
+[class*="subtitle"] {
+  color: #71717a !important;
+}
+
+/* ===== LAYOUT ===== */
+
+#content-area,
+main,
+.dark main,
+.light main {
+  background-color: #0a0a0a !important;
+}
+
+/* Sidebar */
+nav,
+aside {
+  background-color: #0a0a0a !important;
+  border-color: #1c1c1c !important;
+}
+
+/* Sidebar links */
+nav a {
+  color: #71717a !important;
+  transition: color 0.15s ease;
+  font-size: 0.875rem;
+}
+
+nav a:hover {
+  color: #d4d4d8 !important;
+}
+
+/* Active sidebar link */
+nav a[aria-current="page"],
+nav a[data-active="true"] {
+  color: #fafafa !important;
+  font-weight: 500;
+}
+
+/* Sidebar group labels */
+nav h2,
+nav h3,
+nav [class*="group"] > span,
+nav [class*="Group"] > span {
+  color: #fafafa !important;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* Topbar / header */
+header {
+  background-color: rgba(10, 10, 10, 0.8) !important;
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border-bottom: 1px solid #1c1c1c !important;
+}
+
+/* Footer */
+footer {
+  background-color: #0a0a0a !important;
+  border-color: #1c1c1c !important;
+  color: #71717a !important;
+}
+
+/* Borders — global subtle separator */
+[class*="border"],
+[class*="divide"] {
+  border-color: #1c1c1c !important;
+}
+
+/* ===== TYPOGRAPHY ===== */
+
+h1, h2, h3, h4, h5, h6 {
+  color: #fafafa !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+/* Links */
+a {
+  color: #ededed;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: #fafafa;
+}
+
+/* ===== CARDS ===== */
+
+a[class*="block"],
+div[class*="card"],
+div[class*="Card"] {
+  background-color: #0a0a0a !important;
+  border: 1px solid #1c1c1c !important;
+  border-radius: 8px !important;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+a[class*="block"]:hover,
+div[class*="card"]:hover,
+div[class*="Card"]:hover {
+  border-color: #333 !important;
+  background-color: #111 !important;
+}
+
+/* Card titles */
+a[class*="block"] h3,
+a[class*="block"] h4,
+div[class*="card"] h3,
+div[class*="card"] h4,
+div[class*="Card"] h3,
+div[class*="Card"] h4 {
+  color: #fafafa !important;
+}
+
+/* Card description text */
+a[class*="block"] p,
+a[class*="block"] span,
+div[class*="card"] p,
+div[class*="card"] span,
+div[class*="Card"] p,
+div[class*="Card"] span {
+  color: #a1a1aa !important;
+}
+
+/* ===== CODE ===== */
+
+pre,
+code {
+  font-family: 'Geist Mono', 'JetBrains Mono', 'Fira Code', 'Courier New', monospace !important;
+}
+
+pre {
+  background-color: #111 !important;
+  border: 1px solid #1c1c1c !important;
+  border-radius: 8px !important;
+}
+
+code {
+  border-radius: 4px !important;
+}
+
+/* Inline code */
+:not(pre) > code {
+  background-color: #1a1a1a !important;
+  border: 1px solid #262626 !important;
+  padding: 2px 6px !important;
+  color: #e4e4e7 !important;
+  font-size: 0.875em;
+}
+
+/* ===== TABLES ===== */
+
+table {
+  border-color: #1c1c1c !important;
+}
+
+th {
+  background-color: #111 !important;
+  border-color: #1c1c1c !important;
+  color: #71717a !important;
+  font-size: 0.8rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+}
+
+td {
+  border-color: #1c1c1c !important;
+  color: #a1a1aa !important;
+}
+
+tr:hover td {
+  background-color: #111 !important;
+}
+
+/* ===== COMPONENTS ===== */
+
+/* Accordion */
+details {
+  border-color: #1c1c1c !important;
+  background-color: #0a0a0a !important;
+  border-radius: 8px !important;
+}
+
+details summary {
+  color: #fafafa !important;
+  transition: color 0.15s ease;
+}
+
+details summary:hover {
+  color: #ffffff !important;
+}
+
+details > div,
+details > div > *,
+details p,
+details li,
+details span,
+details td,
+details label {
+  color: #a1a1aa !important;
+}
+
+/* Tabs */
+[role="tab"] {
+  transition: color 0.15s ease, border-color 0.15s ease;
+  font-size: 0.875rem;
+}
+
+[role="tab"][aria-selected="true"] {
+  color: #fafafa !important;
+  border-color: #fafafa !important;
+}
+
+[role="tab"][aria-selected="false"] {
+  color: #71717a !important;
+}
+
+[role="tab"][aria-selected="false"]:hover {
+  color: #d4d4d8 !important;
+}
+
+[role="tabpanel"] {
+  background-color: #0a0a0a !important;
+}
+
+[role="tablist"] button,
+[role="tablist"] [role="tab"] {
+  color: #71717a !important;
+  transition: color 0.15s ease;
+}
+
+[role="tablist"] button:hover,
+[role="tablist"] [role="tab"]:hover {
+  color: #d4d4d8 !important;
+}
+
+[role="tablist"] button[aria-selected="true"],
+[role="tablist"] [role="tab"][aria-selected="true"] {
+  color: #fafafa !important;
+  border-bottom-color: #fafafa !important;
+}
+
+/* Steps */
+[class*="step"],
+[class*="Step"] {
+  border-color: #1c1c1c !important;
+}
+
+/* Callouts / Notes */
+[class*="callout"],
+[class*="Callout"] {
+  background-color: #111 !important;
+  border-color: #262626 !important;
+  border-radius: 8px !important;
+}
+
+/* Dividers */
+hr {
+  border-color: #1c1c1c !important;
+}
+
+/* ===== TOPBAR CTA BUTTON ===== */
+
+#topbar-cta-button a,
+#topbar-cta-button a span {
+  background-color: #fafafa !important;
+  color: #0a0a0a !important;
+  border-radius: 6px !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
+  transition: background-color 0.15s ease;
+}
+
+#topbar-cta-button a:hover,
+#topbar-cta-button a:hover span {
+  background-color: #d4d4d8 !important;
+  color: #0a0a0a !important;
+}
+
+/* ===== SEARCH ===== */
+
+[class*="search"],
+[class*="Search"] {
+  background-color: #111 !important;
+  border-color: #1c1c1c !important;
+  border-radius: 8px !important;
+}
+
+/* ===== SCROLLBAR ===== */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #262626;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #333;
+}
+
+/* ===== SELECTION ===== */
+
+::selection {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+/* ===== ANCHORS (sidebar icons) ===== */
+/* Intentionally minimal — avoid broad [class*="anchor"] which breaks icon rendering */
+
+/* ===== TOC (On This Page) ===== */
+
+[class*="toc"] a,
+[class*="Toc"] a,
+[class*="tableOfContents"] a {
+  color: #52525b !important;
+  font-size: 0.8125rem;
+}
+
+[class*="toc"] a:hover,
+[class*="Toc"] a:hover,
+[class*="tableOfContents"] a:hover {
+  color: #d4d4d8 !important;
+}
+
+[class*="toc"] a[aria-current],
+[class*="Toc"] a[aria-current],
+[class*="tableOfContents"] a[aria-current] {
+  color: #fafafa !important;
 }

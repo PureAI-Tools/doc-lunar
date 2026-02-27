@@ -1,33 +1,26 @@
 ---
-title: 'Welcome to PureAI'
-description: 'Complete platform for AI application development'
+title: 'Welcome to Lunar'
+description: 'Distill, route, and deploy LLMs from one platform'
 ---
 
-## PureAI Platform
+## Lunar Platform
 
-PureAI offers a complete set of tools for developers who want to create advanced applications with artificial intelligence. Our platform provides:
+Lunar offers a complete set of tools for developers who want to distill, route, and deploy AI models. Our platform provides:
 
-<CardGroup cols={3}>
+<CardGroup cols={2}>
   <Card
     title="Lunar SDK"
     icon="code"
     href="/lunar/overview"
   >
-    Python SDK for LLM inference with intelligent fallbacks, cost tracking, and built-in evaluations.
+    Python & TypeScript SDK for LLM inference with intelligent routing, fallbacks, cost tracking, and built-in evaluations.
   </Card>
   <Card
     title="GPU Instances"
     icon="server"
     href="/pricing/instance-tiers"
   >
-    Deploy and run open-source models on powerful GPU instances, from L4 to H200.
-  </Card>
-  <Card
-    title="PureCPP"
-    icon="bolt"
-    href="/purecpp/loaders/introduction"
-  >
-    High-performance RAG framework in C++ for document processing and information retrieval.
+    Deploy and run open-source models on dedicated NVIDIA GPUs, from L4 to H200.
   </Card>
 </CardGroup>
 
@@ -35,29 +28,26 @@ PureAI offers a complete set of tools for developers who want to create advanced
 
 <AccordionGroup>
   <Accordion title="Lunar SDK: OpenAI-Compatible LLM Access">
-    Access multiple LLM providers through a single API. Features automatic fallbacks, per-request cost tracking, and a comprehensive evaluation framework with 15+ built-in scorers.
+    Access 12+ LLM providers through a single API. Features smart routing with AI task classification, automatic fallbacks, per-request cost tracking, and a comprehensive evaluation framework with 15+ built-in scorers.
   </Accordion>
   <Accordion title="GPU Instances: Deploy Any Model">
-    Run open-source models like LLaMA, Qwen, DeepSeek, and more on dedicated GPU instances. Choose from 6 tiers ranging from entry-level L4 GPUs to enterprise H200 clusters.
-  </Accordion>
-  <Accordion title="PureCPP: High-Performance Document Processing">
-    Process documents at scale with C++ performance. Support for PDF, DOCX, TXT, and web content. Advanced chunking strategies and embedding generation.
+    Run open-source models like LLaMA, Qwen, DeepSeek, and more on dedicated GPU instances. Choose from 6 tiers ranging from NVIDIA L4 (24GB) to H200 clusters (1128GB).
   </Accordion>
 </AccordionGroup>
 
 ## Get Started
 
 <Tabs>
-  <Tab title="Lunar SDK">
+  <Tab title="Python">
     <Steps>
       <Step title="Install the SDK">
         ```bash
-        pip install lunar
+        pip install lunar-sdk
         ```
       </Step>
       <Step title="Set your API key">
         ```bash
-        export LUNAR_API_KEY="your-api-key"
+        export LUNAR_API_KEY="pk_live_your_key"
         ```
       </Step>
       <Step title="Make your first request">
@@ -66,7 +56,7 @@ PureAI offers a complete set of tools for developers who want to create advanced
 
         client = Lunar()
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="auto",  # smart routing picks the best model
             messages=[{"role": "user", "content": "Hello!"}]
         )
         print(response.choices[0].message.content)
@@ -76,6 +66,53 @@ PureAI offers a complete set of tools for developers who want to create advanced
 
     <Card title="Full Quickstart Guide" icon="rocket" href="/lunar/quickstart">
       Learn more about the Lunar SDK
+    </Card>
+  </Tab>
+
+  <Tab title="TypeScript">
+    <Steps>
+      <Step title="Install the SDK">
+        ```bash
+        npm install lunar-sdk
+        ```
+      </Step>
+      <Step title="Make your first request">
+        ```typescript
+        import Lunar from "lunar-sdk";
+
+        const client = new Lunar({ apiKey: "pk_live_your_key" });
+
+        const response = await client.chat.completions.create({
+          model: "auto",
+          messages: [{ role: "user", content: "Hello!" }],
+        });
+        console.log(response.choices[0].message.content);
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="REST API">
+    <Steps>
+      <Step title="Get your API key">
+        Sign up at the Console and generate a `pk_live_` API key.
+      </Step>
+      <Step title="Make a request">
+        ```bash
+        curl https://api.lunar.dev/v1/chat/completions \
+          -H "Authorization: Bearer pk_live_YOUR_KEY" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "model": "auto",
+            "messages": [{"role": "user", "content": "Hello!"}],
+            "stream": true
+          }'
+        ```
+      </Step>
+    </Steps>
+
+    <Card title="API Reference" icon="book" href="/lunar/api/reference">
+      Full REST API documentation
     </Card>
   </Tab>
 
@@ -97,22 +134,25 @@ PureAI offers a complete set of tools for developers who want to create advanced
     </Card>
   </Tab>
 
-  <Tab title="PureCPP">
+  <Tab title="CLI">
     <Steps>
-      <Step title="Set up the environment">
-        Follow the [setup guide](/setup) to prepare your C++ development environment.
+      <Step title="Install the CLI">
+        ```bash
+        pip install lunar-cli
+        ```
       </Step>
-      <Step title="Get started">
-        Learn the basic concepts in the [quickstart guide](/purecpp/quickstart).
+      <Step title="Authenticate">
+        ```bash
+        lunar auth login --api-key pk_live_YOUR_KEY
+        ```
       </Step>
-      <Step title="Load documents">
-        Learn about [document loaders](/purecpp/loaders/introduction) for your RAG project.
+      <Step title="Distill and deploy">
+        ```bash
+        lunar distill create --teacher gpt-4o --student llama-3.2-3b
+        lunar deploy --model my-distilled-model --gpu L4
+        ```
       </Step>
     </Steps>
-
-    <Card title="PureCPP Quickstart" icon="bolt" href="/purecpp/quickstart">
-      Get started with PureCPP
-    </Card>
   </Tab>
 </Tabs>
 
@@ -137,14 +177,14 @@ PureAI offers a complete set of tools for developers who want to create advanced
   <Card
     title="Discord"
     icon="discord"
-    href="https://discord.gg/8eF9v78Ndv"
+    href="https://discord.gg/thyZx5GkFV"
   >
     Join our community to get help and share experiences.
   </Card>
   <Card
     title="GitHub"
     icon="github"
-    href="https://github.com/pureai-ecosystem"
+    href="https://github.com/lunar-ai"
   >
     Contribute to development and report issues.
   </Card>

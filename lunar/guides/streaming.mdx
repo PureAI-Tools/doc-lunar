@@ -102,7 +102,7 @@ stream = client.chat.completions.create(
     model="gpt-4o-mini",
     messages=[{"role": "user", "content": "Hello!"}],
     stream=True,
-    fallbacks=["claude-3-haiku", "llama-3.1-8b"]
+    fallbacks=["mistral-small-latest", "gpt-4o"]
 )
 
 for chunk in stream:
